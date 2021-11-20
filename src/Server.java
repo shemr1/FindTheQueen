@@ -1,12 +1,19 @@
+//Shemar Brown-Wright
+//20/11/2021
+
 import java.io.*;
 import java.net.*;
 
+
+//Server class 
 public class Server {
     private ServerSocket ss;
     private int numPlayers;
-   
+   //declaration of ssc for each user
     private ServerSideConnection player1;
     private ServerSideConnection player2;
+    
+    // declare counters
     private int turns;
     private int maxRounds;
     private int p1Num;
@@ -23,7 +30,7 @@ public class Server {
         maxRounds = 4;
         rounds = 0;
 
-
+        // creation of socket at specific port
         try {
             ss = new ServerSocket(7621);
         } catch (IOException e) {
@@ -38,6 +45,8 @@ public class Server {
     	private DataOutputStream dataOut;
     	private int playerId;
     	
+        
+        // denoting each user by id 
     	public ServerSideConnection(Socket s, int id) {
     		socket = s;
     		playerId = id;
@@ -52,13 +61,19 @@ public class Server {
     	
     	
     	public void run() {
+            
+            //sending the id and initial round to the client
     		try {
     			dataOut.writeInt(playerId);
                 dataOut.write(maxRounds);
     			dataOut.flush();
     			
+                
+                //game specific instructions
+                
+                //loop 
     			while (turns < 5) {
-                  
+                  //check if user has implemented an imput click
     				if(playerId ==1){
                         p1Num = dataIn.readInt();
                         System.out.println("Player 1 clicked button #" + p1Num);
@@ -73,6 +88,7 @@ public class Server {
                         turns++;
                         System.out.println(turns);
                         player1.sendClick(p2Num);
+                        // check criteria for round win based off passed round counter
                         if(turns % 2 == 0){
                             if(p1Num == p2Num){
                           
@@ -93,6 +109,7 @@ public class Server {
     			
     		}
     	}
+        //send click value
         public void sendClick(int n ){
             try{
                 dataOut.writeInt(n);
@@ -107,19 +124,21 @@ public class Server {
     
     public void connectServer() {
  
-    	
+    	//connect server side 
+        //accept client request as long as total number of players is less than 2
         try {
             while(numPlayers < 2){
                 Socket s = ss.accept();
                 numPlayers++;
                 System.out.println("Player " + numPlayers + " connected. Hello ");
                 ServerSideConnection ssc = new ServerSideConnection(s, numPlayers);
-
+                //denote which player has what connection
                 if(numPlayers == 1){
                     player1= ssc;
                 }else {
                     player2 = ssc;
                 }
+                //implement thread
                 Thread t = new Thread(ssc);
                 t.start();
             }
@@ -135,3 +154,4 @@ public class Server {
     }
 
 }
+//--SBW--
